@@ -1,0 +1,39 @@
+name: ss.com listing notifier
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write config from secret
+        run: |
+          if [ -z "$CONFIG_YAML" ]; then
+            echo "Repository secret CONFIG_YAML is not set or is empty." >&2
+            exit 1
+          fi
+          printf '%s\n' "$CONFIG_YAML" > config.yaml
+        env:
+          CONFIG_YAML: ${{ secrets.CONFIG_YAML }}
+
+      - name: Run notifier
+        run: python run_ss_notifier.py --config config.yaml
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}

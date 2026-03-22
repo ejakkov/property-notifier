@@ -1,0 +1,26 @@
+# Copy to config.yaml and adjust. Secrets can stay in the environment:
+# TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN.
+# String values support ${VAR_NAME} interpolation from the environment.
+
+ss_listing_url: "https://www.ss.com/lv/real-estate/flats/riga/centre/"
+
+price_min_eur: 0
+price_max_eur: 100000
+# deal_type: all | rent | sale
+deal_type: all
+
+telegram_bot_token: "${TELEGRAM_BOT_TOKEN}"
+telegram_chat_id: "${TELEGRAM_CHAT_ID}"
+
+# Remote Turso / libSQL (optional). When set, state uses libsql.connect; set TURSO_AUTH_TOKEN in env.
+# Leave empty for local file SQLite only (state_db_path below).
+libsql_url: "${TURSO_DATABASE_URL}"
+
+# Used as local SQLite path when libsql_url is empty; ignored for schema when using Turso remote.
+state_db_path: data/state.sqlite
+
+dry_run: false
+
+max_pages: 1
+request_timeout_sec: 30
+delay_between_pages_sec: 1.5
