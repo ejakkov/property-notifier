@@ -166,12 +166,13 @@ def paginate_urls(listing_url: str, max_pages: int) -> list[str]:
 def fetch_listings(config: Config) -> list[Listing]:
     """HTTP GET listing pages and parse all rows."""
     all_rows = []
-    urls = paginate_urls(config.ss_listing_url, config.max_pages)
     with httpx.Client(timeout=config.request_timeout_sec) as client:
-        for i, url in enumerate(urls):
-            resp = client.get(url)
-            resp.raise_for_status()
-            all_rows.extend(parse_listing_html(resp.text, base_url="https://www.ss.com/"))
-            if i + 1 < len(urls):
-                time.sleep(config.delay_between_pages_sec)
+        for listing_url in config.ss_listing_urls:
+            urls = paginate_urls(listing_url, config.max_pages)
+            for i, url in enumerate(urls):
+                resp = client.get(url)
+                resp.raise_for_status()
+                all_rows.extend(parse_listing_html(resp.text, base_url="https://www.ss.com/"))
+                if i + 1 < len(urls):
+                    time.sleep(config.delay_between_pages_sec)
     return all_rows

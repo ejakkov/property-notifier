@@ -19,7 +19,7 @@ class DealType(str, Enum):
 
 
 _DEFAULTS: dict[str, Any] = {
-    "ss_listing_url": "https://www.ss.com/lv/real-estate/flats/riga/centre/",
+    "ss_listing_urls": ["https://www.ss.com/lv/real-estate/flats/riga/centre/"],
     "price_min_eur": 0,
     "price_max_eur": 1000000,
     "deal_type": "all",
@@ -38,7 +38,7 @@ _DEFAULTS: dict[str, Any] = {
 class Config:
     """Runtime settings loaded from YAML (and optional env overrides)."""
 
-    ss_listing_url: str
+    ss_listing_urls: list[str]
     price_min_eur: float
     price_max_eur: float
     deal_type: DealType
@@ -100,6 +100,19 @@ def _coerce_deal_type(raw: str) -> DealType:
         raise ValueError(f"deal_type must be one of: {allowed}") from e
 
 
+def _coerce_listing_urls(data: dict[str, Any]) -> list[str]:
+    urls_raw = data.get("ss_listing_urls")
+
+    if urls_raw is None:
+        urls_raw = _DEFAULTS["ss_listing_urls"]
+
+    urls = [str(x).strip() for x in urls_raw]
+
+    if not urls:
+        raise ValueError("At least one listing URL must be provided in ss_listing_urls")
+    return urls
+
+
 def load_config(path: str | Path) -> Config:
     """Load configuration from a YAML file. Paths in the file are resolved relative to the file."""
     cfg_path = Path(path).expanduser().resolve()
@@ -145,7 +158,7 @@ def load_config(path: str | Path) -> Config:
     price_max_eur = float(data["price_max_eur"])
 
     cfg = Config(
-        ss_listing_url=str(data["ss_listing_url"]),
+        ss_listing_urls=_coerce_listing_urls(data),
         price_min_eur=price_min_eur,
         price_max_eur=price_max_eur,
         deal_type=_coerce_deal_type(str(data["deal_type"])),

@@ -21,7 +21,7 @@ Small Python utility that watches a [ss.com](https://www.ss.com/) real-estate ca
 
 | Field                             | Meaning                                                                                               |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ss_listing_url`                  | Full URL of the SS.com category/listing page to watch (must match the site’s table layout).           |
+| `ss_listing_urls`                 | One or more SS.com category/listing page URLs to watch.                                                   |
 | `price_min_eur` / `price_max_eur` | Inclusive EUR bounds; rows without a parseable price are skipped.                                     |
 | `deal_type`                       | `all`, `rent`, or `sale` - rent/sale is inferred from the price cell (e.g. monthly rent vs lump sum). |
 | `state_db_path`                   | SQLite file for seen IDs (relative paths are resolved next to the config file).                       |

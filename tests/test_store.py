@@ -8,7 +8,7 @@ from ss_notifier.store import insert_seen, is_known, seed_ids
 
 def _cfg(db: Path) -> Config:
     return Config(
-        ss_listing_url="https://example.com/",
+        ss_listing_urls=["https://example.com/"],
         price_min_eur=0,
         price_max_eur=1,
         deal_type=DealType.all,

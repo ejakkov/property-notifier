@@ -31,7 +31,8 @@ def test_load_config_interpolates_and_telegram_env(tmp_path: Path, monkeypatch: 
     cfg_file = tmp_path / "c.yaml"
     cfg_file.write_text(
         """
-ss_listing_url: "https://example.com/"
+ss_listing_urls:
+  - "https://example.com/"
 price_min_eur: 1
 price_max_eur: 2
 deal_type: all
@@ -47,6 +48,7 @@ delay_between_pages_sec: 1
         encoding="utf-8",
     )
     cfg = load_config(cfg_file)
+    assert cfg.ss_listing_urls == ["https://example.com/"]
     assert cfg.telegram_bot_token == "from-env-token"
     assert cfg.telegram_chat_id == "from-env-chat"
 
@@ -58,7 +60,8 @@ def test_load_config_libsql_requires_turso_token(tmp_path: Path, monkeypatch: py
     cfg_file = tmp_path / "c.yaml"
     cfg_file.write_text(
         """
-ss_listing_url: "https://example.com/"
+ss_listing_urls:
+  - "https://example.com/"
 libsql_url: "libsql://db.turso.io"
 telegram_bot_token: "t"
 telegram_chat_id: "c"
@@ -79,7 +82,8 @@ def test_load_config_libsql_ok_with_token(tmp_path: Path, monkeypatch: pytest.Mo
     cfg_file = tmp_path / "c.yaml"
     cfg_file.write_text(
         """
-ss_listing_url: "https://example.com/"
+ss_listing_urls:
+  - "https://example.com/"
 libsql_url: "libsql://db.turso.io"
 telegram_bot_token: "t"
 telegram_chat_id: "c"

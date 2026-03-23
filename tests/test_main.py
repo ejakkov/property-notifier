@@ -30,7 +30,7 @@ def _listing(**kwargs: object) -> Listing:
 
 def _config(state_db: Path, **kwargs: object) -> Config:
     base: dict[str, object] = {
-        "ss_listing_url": "https://example.com/list/",
+        "ss_listing_urls": ["https://example.com/list/"],
         "price_min_eur": 10000,
         "price_max_eur": 200000,
         "deal_type": DealType.all,

@@ -2,7 +2,9 @@
 # TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN.
 # String values support ${VAR_NAME} interpolation from the environment.
 
-ss_listing_url: "https://www.ss.com/lv/real-estate/flats/riga/centre/"
+ss_listing_urls:
+  - "https://www.ss.com/lv/real-estate/flats/riga/centre/"
+  - "https://www.ss.com/lv/real-estate/flats/riga/agenskalns/"
 
 price_min_eur: 0
 price_max_eur: 100000
