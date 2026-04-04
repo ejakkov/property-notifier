@@ -22,6 +22,8 @@ _DEFAULTS: dict[str, Any] = {
     "ss_listing_urls": ["https://www.ss.com/lv/real-estate/flats/riga/centre/"],
     "price_min_eur": 0,
     "price_max_eur": 1000000,
+    "floor_min": None,
+    "floor_max": None,
     "deal_type": "all",
     "telegram_bot_token": "",
     "telegram_chat_id": "",
@@ -41,6 +43,8 @@ class Config:
     ss_listing_urls: list[str]
     price_min_eur: float
     price_max_eur: float
+    floor_min: int | None
+    floor_max: int | None
     deal_type: DealType
     telegram_bot_token: str
     telegram_chat_id: str
@@ -90,6 +94,15 @@ def _merge_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
         if v is not None:
             out[k] = v
     return out
+
+
+def _optional_floor_bound(key: str, raw: Any) -> int | None:
+    if raw is None:
+        return None
+    n = int(raw)
+    if n < 0:
+        raise ValueError(f"{key} must be null or a non-negative integer")
+    return n
 
 
 def _coerce_deal_type(raw: str) -> DealType:
@@ -157,10 +170,17 @@ def load_config(path: str | Path) -> Config:
     price_min_eur = float(data["price_min_eur"])
     price_max_eur = float(data["price_max_eur"])
 
+    floor_min = _optional_floor_bound("floor_min", data.get("floor_min"))
+    floor_max = _optional_floor_bound("floor_max", data.get("floor_max"))
+    if floor_min is not None and floor_max is not None and floor_min > floor_max:
+        raise ValueError("floor_min cannot be greater than floor_max")
+
     cfg = Config(
         ss_listing_urls=_coerce_listing_urls(data),
         price_min_eur=price_min_eur,
         price_max_eur=price_max_eur,
+        floor_min=floor_min,
+        floor_max=floor_max,
         deal_type=_coerce_deal_type(str(data["deal_type"])),
         telegram_bot_token=token,
         telegram_chat_id=chat_id,

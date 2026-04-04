@@ -96,3 +96,50 @@ max_pages: 1
     cfg = load_config(cfg_file)
     assert cfg.libsql_url == "libsql://db.turso.io"
     assert cfg.uses_remote()
+
+
+def test_load_config_floor_bounds(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "t")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "c")
+    cfg_file = tmp_path / "c.yaml"
+    cfg_file.write_text(
+        """
+ss_listing_urls:
+  - "https://example.com/"
+telegram_bot_token: "t"
+telegram_chat_id: "c"
+state_db_path: state.sqlite
+dry_run: false
+max_pages: 1
+floor_min: 2
+floor_max: 7
+""",
+        encoding="utf-8",
+    )
+    cfg = load_config(cfg_file)
+    assert cfg.floor_min == 2
+    assert cfg.floor_max == 7
+
+
+def test_load_config_rejects_inverted_floor_range(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "t")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "c")
+    cfg_file = tmp_path / "c.yaml"
+    cfg_file.write_text(
+        """
+ss_listing_urls:
+  - "https://example.com/"
+telegram_bot_token: "t"
+telegram_chat_id: "c"
+state_db_path: state.sqlite
+dry_run: false
+max_pages: 1
+floor_min: 5
+floor_max: 2
+""",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="floor_min cannot be greater"):
+        load_config(cfg_file)

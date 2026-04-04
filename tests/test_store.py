@@ -11,6 +11,8 @@ def _cfg(db: Path) -> Config:
         ss_listing_urls=["https://example.com/"],
         price_min_eur=0,
         price_max_eur=1,
+        floor_min=None,
+        floor_max=None,
         deal_type=DealType.all,
         telegram_bot_token="t",
         telegram_chat_id="1",

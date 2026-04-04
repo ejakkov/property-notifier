@@ -7,7 +7,7 @@ from dataclasses import replace
 
 from ss_notifier.config import Config, DealType, load_config
 from ss_notifier.notify import send_telegram_listing
-from ss_notifier.scraper import Listing, fetch_listings
+from ss_notifier.scraper import Listing, fetch_listings, parse_listing_floor
 from ss_notifier.store import insert_seen, is_known, seed_ids
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,18 @@ def passes_filters(listing: Listing, cfg: Config) -> bool:
     elif cfg.deal_type == DealType.sale:
         if listing.is_rent is not False:
             return False
-    return cfg.price_min_eur <= listing.price_eur <= cfg.price_max_eur
+    if not (cfg.price_min_eur <= listing.price_eur <= cfg.price_max_eur):
+        return False
+    if cfg.floor_min is None and cfg.floor_max is None:
+        return True
+    floor_n = parse_listing_floor(listing.floor)
+    if floor_n is None:
+        return False
+    if cfg.floor_min is not None and floor_n < cfg.floor_min:
+        return False
+    if cfg.floor_max is not None and floor_n > cfg.floor_max:
+        return False
+    return True
 
 
 def run_seed(cfg: Config) -> int:

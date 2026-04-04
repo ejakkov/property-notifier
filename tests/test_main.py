@@ -33,6 +33,8 @@ def _config(state_db: Path, **kwargs: object) -> Config:
         "ss_listing_urls": ["https://example.com/list/"],
         "price_min_eur": 10000,
         "price_max_eur": 200000,
+        "floor_min": None,
+        "floor_max": None,
         "deal_type": DealType.all,
         "telegram_bot_token": "token",
         "telegram_chat_id": "123",
@@ -76,6 +78,28 @@ class TestPassesFilters:
         assert passes_filters(_listing(price_eur=40000), cfg) is True
         assert passes_filters(_listing(price_eur=60000), cfg) is True
         assert passes_filters(_listing(price_eur=60001), cfg) is False
+
+    def test_floor_filter_off_when_unset(self, tmp_path: Path) -> None:
+        cfg = _config(tmp_path / "s.sqlite", floor_min=None, floor_max=None)
+        assert passes_filters(_listing(price_eur=50000, floor=""), cfg) is True
+        assert passes_filters(_listing(price_eur=50000, floor="x"), cfg) is True
+
+    def test_floor_bounds(self, tmp_path: Path) -> None:
+        cfg = _config(tmp_path / "s.sqlite", floor_min=2, floor_max=5)
+        assert passes_filters(_listing(price_eur=50000, floor="1"), cfg) is False
+        assert passes_filters(_listing(price_eur=50000, floor="2"), cfg) is True
+        assert passes_filters(_listing(price_eur=50000, floor="5/9"), cfg) is True
+        assert passes_filters(_listing(price_eur=50000, floor="6"), cfg) is False
+
+    def test_floor_min_only(self, tmp_path: Path) -> None:
+        cfg = _config(tmp_path / "s.sqlite", floor_min=3, floor_max=None)
+        assert passes_filters(_listing(price_eur=50000, floor="2"), cfg) is False
+        assert passes_filters(_listing(price_eur=50000, floor="10/12"), cfg) is True
+
+    def test_floor_unknown_when_filter_active(self, tmp_path: Path) -> None:
+        cfg = _config(tmp_path / "s.sqlite", floor_min=1, floor_max=10)
+        assert passes_filters(_listing(price_eur=50000, floor=""), cfg) is False
+        assert passes_filters(_listing(price_eur=50000, floor="—"), cfg) is False
 
 
 class TestRunSeed:

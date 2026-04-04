@@ -14,6 +14,17 @@ from ss_notifier.config import Config
 logger = logging.getLogger(__name__)
 
 
+def parse_listing_floor(floor_cell: str) -> int | None:
+    """Apartment level from the listing cell, e.g. ``3/9`` → 3."""
+    s = " ".join(floor_cell.split())
+    if not s:
+        return None
+    m = re.search(r"\d+", s)
+    if not m:
+        return None
+    return int(m.group(0))
+
+
 @dataclass(frozen=True)
 class Listing:
     """One row from the SS.com listing table."""

@@ -8,6 +8,10 @@ ss_listing_urls:
 
 price_min_eur: 0
 price_max_eur: 100000
+# Apartment level. Omit or set to null for no limit.
+# floor_min: 2
+# floor_max: 5
+
 # deal_type: all | rent | sale
 deal_type: all
 
