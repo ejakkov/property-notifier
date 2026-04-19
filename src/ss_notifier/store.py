@@ -4,7 +4,7 @@ import os
 import sqlite3
 from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from ss_notifier.config import Config
@@ -86,3 +86,16 @@ def seed_ids(cfg: Config, ids: Iterable[str]) -> int:
             n += 1
         conn.commit()
     return n
+
+
+def delete_seen_older_than(cfg: Config, *, days: int) -> int:
+    """Remove seen_listings rows whose first_seen_at is strictly older than *days*"""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    with _connection(cfg) as conn:
+        cur = conn.execute(
+            "DELETE FROM seen_listings WHERE DATE(first_seen_at) < ?",
+            (cutoff,),
+        )
+        conn.commit()
+        rc = getattr(cur, "rowcount", -1)
+        return int(rc) if rc is not None and rc >= 0 else 0
